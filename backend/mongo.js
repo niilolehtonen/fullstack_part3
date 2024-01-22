@@ -12,28 +12,28 @@ const url = `mongodb+srv://niiloilehtonen:${args[2]}@cluster0.urpvrlc.mongodb.ne
 mongoose.set("strictQuery", false);
 mongoose.connect(url);
 
-const numberSchema = new mongoose.Schema({
+const personSchema = new mongoose.Schema({
   name: String,
   number: String,
 });
 
-const Number = mongoose.model("Number", numberSchema);
+const Person = mongoose.model("Person", personSchema);
 
-const number = new Number({
+const person = new Person({
   name: args[3],
   number: args[4],
 });
 
 if (args.length === 3) {
-  Number.find({}).then((result) => {
+  Person.find({}).then((result) => {
     console.log("phonebook:");
-    result.forEach((number) => {
-      console.log(number.name, number.number);
+    result.forEach((person) => {
+      console.log(person.name, person.number);
     });
     mongoose.connection.close();
   });
 } else {
-  number.save().then((result) => {
+  person.save().then((result) => {
     console.log(`added ${args[3]} number ${args[4]} to phonebook`);
     mongoose.connection.close();
   });
