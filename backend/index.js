@@ -34,23 +34,25 @@ app.get("/api/persons", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.get("/info", (req, res) => {
-  const numberofPersons = persons.length;
-  const infoMessage = `Phonebook has info for ${numberofPersons} people`;
+app.get("/info", (req, res, next) => {
   const reqTime = new Date();
-  res.writeHead(200, "Content-Type", "text/plain");
-  res.end(`${infoMessage}\n${reqTime}`);
+  Person.find({})
+    .then((persons) => {
+      res.send(
+        `<div>phonebook has info for ${persons.length} people</div>
+            <div>${reqTime}</div>
+            `
+      );
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const person = persons.find((person) => person.id === id);
-
-  if (person) {
-    res.json(person);
-  } else {
-    res.status(404).end();
-  }
+app.get("/api/persons/:id", (req, res, next) => {
+  Person.findById(req.params.id)
+    .then((person) => {
+      res.json(person);
+    })
+    .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (req, res, next) => {
