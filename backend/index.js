@@ -4,6 +4,15 @@ require("dotenv").config();
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+
+  next(error);
+};
 
 app.use(cors());
 app.use(express.json());
@@ -14,17 +23,16 @@ morgan.token("body", function (req) {
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body")
 );
+app.use(errorHandler);
 
 const Person = require("./models/persons");
 
-const generateId = () => {
-  return Math.floor(Math.random() * 1000) + 1;
-};
-
 app.get("/api/persons", (req, res) => {
-  Person.find({}).then((persons) => {
-    res.json(persons);
-  });
+  Person.find({})
+    .then((persons) => {
+      res.json(persons);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/info", (req, res) => {
@@ -69,9 +77,12 @@ app.post("/api/persons", (req, res) => {
     number: body.number,
   });
 
-  person.save().then((savedPerson) => {
-    res.json(savedPerson);
-  });
+  person
+    .save()
+    .then((savedPerson) => {
+      res.json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 const PORT = process.env.PORT;
