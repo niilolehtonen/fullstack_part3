@@ -1,14 +1,13 @@
-const { response } = require("express");
 const express = require("express");
 require("dotenv").config();
 const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, req, res, next) => {
   console.error(error.message);
 
   if (error.name === "CastError") {
-    return response.status(400).send({ error: "malformatted id" });
+    return res.status(400).send({ error: "malformatted id" });
   }
 
   next(error);
@@ -27,7 +26,7 @@ app.use(errorHandler);
 
 const Person = require("./models/persons");
 
-app.get("/api/persons", (req, res) => {
+app.get("/api/persons", (req, res, next) => {
   Person.find({})
     .then((persons) => {
       res.json(persons);
@@ -38,9 +37,9 @@ app.get("/api/persons", (req, res) => {
 app.get("/info", (req, res) => {
   const numberofPersons = persons.length;
   const infoMessage = `Phonebook has info for ${numberofPersons} people`;
-  const requestTime = new Date();
+  const reqTime = new Date();
   res.writeHead(200, "Content-Type", "text/plain");
-  res.end(`${infoMessage}\n${requestTime}`);
+  res.end(`${infoMessage}\n${reqTime}`);
 });
 
 app.get("/api/persons/:id", (req, res) => {
@@ -62,7 +61,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const body = req.body;
 
   if (!body.name || !body.number) {
@@ -81,6 +80,21 @@ app.post("/api/persons", (req, res) => {
     .save()
     .then((savedPerson) => {
       res.json(savedPerson);
+    })
+    .catch((error) => next(error));
+});
+
+app.put("/api/persons/:id", (req, res, next) => {
+  const body = req.body;
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      res.json(updatedPerson);
     })
     .catch((error) => next(error));
 });
