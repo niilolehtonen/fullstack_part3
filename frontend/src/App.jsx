@@ -48,13 +48,6 @@ const App = () => {
               setNotification(null)
             }, 5000)
           })
-          .catch(error => {
-            console.log(error.response.data.error)
-            setErrorMessage(`${error.response.data.error}`)
-            setTimeout(() => {
-              setErrorMessage(null)
-            }, 5000)
-          })
       }
       return
     }
@@ -76,9 +69,16 @@ const App = () => {
       setTimeout(() => {
         setNotification(null)
       }, 5000)
+    
   }
     )
-
+    .catch(error => {
+      console.log(error.response.data.error)
+      setErrorMessage(`${error.response.data.error}`)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    })
 
   }
   
